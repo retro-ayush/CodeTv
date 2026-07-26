@@ -12,6 +12,60 @@
   background: var(--ink);
 }
 
+/* --- Suit backdrop ------------------------------------------------------
+   Sits behind the web strands and the quote. Both children are driven as one
+   group by SpiderHero.js so they fade and drift together on scroll. */
+.hero-suit {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  /* Hidden pre-hydration; the intro timeline fades it up. The loader covers
+     the hero while that happens, so this is never seen as a blank frame. */
+  opacity: 0;
+}
+
+/* Reduced motion skips the intro timeline entirely, so the backdrop has to
+   be visible from the start there. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-suit {
+    opacity: 0.85;
+  }
+}
+
+/* Suit artwork.
+   Two background layers: a vignette gradient on top to sink the edges into
+   the page, and the image beneath it. The solid colour behind both is what
+   shows if the file is missing, so a 404 degrades to a dark red field rather
+   than a white flash. */
+.hero-suit-weave {
+  position: absolute;
+  /* Oversized so the parallax drift never exposes a bare edge. */
+  inset: -15%;
+  display: block;
+  background-color: #1a0305;
+  background-image:
+    radial-gradient(
+      circle at 50% 45%,
+      transparent 0%,
+      transparent 30%,
+      rgba(0, 0, 0, 0.5) 66%,
+      #000 92%
+    ),
+    url("/406168.jpg");
+  background-size:
+    100% 100%,
+    cover;
+  background-position:
+    center,
+    center;
+  background-repeat: no-repeat, no-repeat;
+  /* Knock the artwork back so the quote stays the brightest thing on screen
+     and the red doesn't fight the collage further down. */
+  filter: saturate(0.85) brightness(0.62) contrast(1.08);
+}
+
 /* --- Web strands ------------------------------------------------------- */
 .hero-web {
   position: absolute;
@@ -19,6 +73,7 @@
   inset: -25%;
   width: 150%;
   height: 150%;
+  z-index: 1; /* over the suit, under the quote */
   color: var(--paper);
   opacity: 0.14;
   pointer-events: none;

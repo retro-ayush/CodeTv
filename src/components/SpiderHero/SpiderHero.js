@@ -6,6 +6,8 @@ const hero = document.querySelector("[data-hero]");
 if (hero) {
   const quote = hero.querySelector("[data-quote]");
   const strands = hero.querySelectorAll("[data-strand]");
+  const suit = hero.querySelector("[data-suit]");
+  const suitWeave = hero.querySelector("[data-suit-weave]");
 
   /* --- Reduced motion: show the final composition, skip the choreography --- */
   if (reduced) {
@@ -13,6 +15,7 @@ if (hero) {
       opacity: 1,
     });
     gsap.set(hero.querySelector("[data-rule]"), { scaleX: 1 });
+    gsap.set(suit, { opacity: 0.85 });
   } else {
     /* --- Split the three stacked copies into characters ------------------
        Each copy is split independently so the ghosts can be offset per-char
@@ -30,6 +33,24 @@ if (hero) {
        working if the loader is ever removed from the page. */
     const tl = gsap.timeline({ paused: true });
     (window.__introDone ?? Promise.resolve()).then(() => tl.play());
+
+    /* 0. Suit backdrop resolves first, so the quote lands onto it rather
+          than appearing over empty black. Held below full opacity — it is a
+          backdrop, and the quote has to stay the brightest thing on screen. */
+    /* immediateRender:false so this does not stamp opacity 0 over the scroll
+       tween's start value while the timeline is still paused. */
+    tl.fromTo(
+      suit,
+      { opacity: 0, scale: 1.12 },
+      {
+        opacity: 0.85,
+        scale: 1,
+        duration: 2.4,
+        ease: "power2.out",
+        immediateRender: false,
+      },
+      0
+    );
 
     /* 1. Web strands trace themselves in behind the quote. */
     tl.fromTo(
@@ -141,6 +162,45 @@ if (hero) {
         start: "top top",
         end: "bottom top",
         scrub: 0.6,
+      },
+    });
+
+    /* Suit fades on the same scrub as the quote but scales less — the smaller
+       move reads as distance behind the text. It clears just before the hero
+       fully leaves, so it never bleeds into the collage. */
+    /* fromTo, not to: this tween is built at module load, when the suit is
+       still at its CSS opacity of 0 because the intro has not run yet. A
+       plain `to` would capture 0 as the start and animate 0 → 0, so the
+       backdrop appeared to vanish the instant you scrolled. Pinning the
+       start value explicitly decouples it from creation order. */
+    gsap.fromTo(
+      suit,
+      { scale: 1, opacity: 0.85, filter: "blur(0px)" },
+      {
+        scale: 1.15,
+        opacity: 0,
+        filter: "blur(10px)",
+        ease: "none",
+        scrollTrigger: {
+          trigger: hero,
+          start: "top top",
+          end: "85% top",
+          scrub: 0.6,
+        },
+      }
+    );
+
+    /* Artwork drifts up behind its own container — parallax within the suit
+       layer, so the image and its vignette don't move as one flat plane. */
+    gsap.to(suitWeave, {
+      yPercent: -8,
+      scale: 1.08,
+      ease: "none",
+      scrollTrigger: {
+        trigger: hero,
+        start: "top top",
+        end: "bottom top",
+        scrub: 1,
       },
     });
 

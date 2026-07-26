@@ -39,7 +39,10 @@ if (!loader) {
       else document.addEventListener("DOMContentLoaded", resolve, { once: true });
     }),
   ]);
-  const safetyNet = new Promise((resolve) => setTimeout(resolve, 6000));
+  /* Escape hatch for a stalled font or stylesheet. Generous enough that it
+     never pre-empts a slow-but-progressing intro — the animation path gates
+     its own exit on the timeline completing, not on this. */
+  const safetyNet = new Promise((resolve) => setTimeout(resolve, 12000));
 
   if (reduced) {
     /* Static: one frame, title visible, brief hold, then out. */
@@ -217,12 +220,20 @@ if (!loader) {
     /* ================================================================
        EXIT — held long enough for the title to land, then shutter out
        ================================================================ */
-    /* Title lands at SETTLE+0.6 and glitches at SETTLE+1.0; exiting at +1.35
-       lets the glitch resolve without leaving a dead hold on screen. */
-    const MIN_BEAT = (SETTLE + 1.35) * 1000;
-    const minimumBeat = new Promise((r) => setTimeout(r, MIN_BEAT));
+    /* Hold the title on screen after the glitch resolves, then exit.
+       This is added to the intro timeline itself rather than run off a
+       setTimeout: a wall-clock timer drifts out of sync whenever the main
+       thread stalls (font decode, style recalc, the panel-video 404s), and
+       the wipe would then start while the title was still crashing in —
+       which is what cut the word in half on some loads. */
+    tl.to({}, { duration: 0.35 }, SETTLE + 1.15);
 
-    Promise.race([Promise.all([pageReady, minimumBeat]), safetyNet]).then(() => {
+    /* Timeline finished => the title has definitely landed and held. */
+    const introPlayed = new Promise((resolve) => {
+      tl.eventCallback("onComplete", resolve);
+    });
+
+    Promise.race([Promise.all([pageReady, introPlayed]), safetyNet]).then(() => {
       gsap
         .timeline({ onComplete: finish })
         /* Title and reel punch away together. */

@@ -11,6 +11,19 @@ const QUOTE = 'With great power comes great responsibility';
 ---
 
 <section class="hero" data-hero>
+	<!--
+		Suit backdrop image, sitting behind everything else in the hero and
+		scrolling away with the quote.
+
+		Artwork is /public/406168.jpg, loaded via `background-image` on
+		.hero-suit-weave in SpiderHero.css — change the url() there to swap it.
+		Framing is controlled by `background-position` / `background-size` on
+		that same rule.
+	-->
+	<div class="hero-suit" data-suit aria-hidden="true">
+		<span class="hero-suit-weave" data-suit-weave></span>
+	</div>
+
 	<!-- Web strands drawn behind the quote. DrawSVGPlugin traces each path on
 	     load; the strands then drift on a slow loop. -->
 	<svg
