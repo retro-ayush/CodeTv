@@ -1,0 +1,100 @@
+---
+/**
+ * Loader — Marvel-ident-structured cinematic intro.
+ *
+ * Beat map (≈4.6s), mirroring the studio ident's rhythm:
+ *   0.0–0.6  SLOW      one frame holds, camera already pushing in
+ *   0.6–2.4  BUILD     frames flip faster and faster, push-in accelerates
+ *   2.4–3.0  BURST     rapid-fire flicker, hardest zoom
+ *   3.0–3.6  SETTLE    frames slam to a stop, title crashes in
+ *   3.6–4.6  HOLD+OUT  glitch hold, then wipe to the page
+ *
+ * Every frame is full-bleed and procedurally drawn — no image assets. Each
+ * is a distinct comic composition (figure, skyline, web-burst, speech panel,
+ * action lines) rather than a flat gradient.
+ */
+import './Loader.css';
+
+/* Frame recipes. `kind` selects the composition drawn by CSS; `tone` sets the
+   duotone. Order matters — this is the cut sequence. */
+const FRAMES = [
+	{ kind: 'figure', tone: 'red' },
+	{ kind: 'burst', tone: 'blue' },
+	{ kind: 'city', tone: 'red' },
+	{ kind: 'grid', tone: 'split' },
+	{ kind: 'figure', tone: 'blue' },
+	{ kind: 'speech', tone: 'red' },
+	{ kind: 'web', tone: 'blue' },
+	{ kind: 'city', tone: 'split' },
+	{ kind: 'burst', tone: 'red' },
+	{ kind: 'grid', tone: 'blue' },
+	{ kind: 'web', tone: 'red' },
+	{ kind: 'speech', tone: 'split' },
+	{ kind: 'figure', tone: 'red' },
+	{ kind: 'burst', tone: 'blue' },
+	{ kind: 'city', tone: 'red' },
+	{ kind: 'web', tone: 'split' },
+];
+
+const TITLE = 'SPIDER';
+---
+
+<div class="loader" data-loader>
+	<!-- Full-bleed flip stack. Frames are absolutely stacked; JS reveals one
+	     at a time, so there is no horizontal scroll — it is a cut, not a slide. -->
+	<div class="loader-reel" data-loader-reel>
+		{
+			FRAMES.map((f, i) => (
+				<div
+					class={`iframe iframe--${f.kind} iframe--${f.tone}`}
+					data-iframe
+					style={`--i:${i}`}
+				>
+					<span class="iframe-art" />
+					<span class="iframe-gutter" />
+				</div>
+			))
+		}
+	</div>
+
+	<!-- Scanline + grain sit above the frames so the whole reel feels filmed. -->
+	<div class="loader-vhs" aria-hidden="true">
+		<span class="loader-vhs-scan"></span>
+		<span class="loader-vhs-flicker" data-loader-flicker></span>
+	</div>
+
+	<!-- Title crash-in. Three offset copies = heavy chromatic split. -->
+	<div class="loader-title" data-loader-title aria-hidden="true">
+		<span class="loader-title-layer loader-title-layer--red" data-title-red
+			>{TITLE}</span
+		>
+		<span class="loader-title-layer loader-title-layer--blue" data-title-blue
+			>{TITLE}</span
+		>
+		<span class="loader-title-layer loader-title-layer--main" data-title-main
+			>{TITLE}</span
+		>
+	</div>
+
+	<!-- Progress, bottom-anchored and unobtrusive. -->
+	<div class="loader-hud">
+		<div class="loader-meter">
+			<span class="loader-meter-fill" data-loader-fill></span>
+		</div>
+		<p class="loader-count" data-loader-count>00</p>
+	</div>
+
+	<!-- Shutter panels for the exit wipe. -->
+	<span class="loader-wipe loader-wipe--top" data-loader-wipe aria-hidden="true"
+	></span>
+	<span
+		class="loader-wipe loader-wipe--bottom"
+		data-loader-wipe
+		aria-hidden="true"></span>
+
+	<p class="sr-only" role="status">Loading</p>
+</div>
+
+<script>
+	import './Loader.js';
+</script>

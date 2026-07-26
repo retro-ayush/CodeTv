@@ -1,0 +1,60 @@
+/* ==========================================================================
+   Design tokens — the single place to retune the whole page.
+   Change a value here and it propagates to every component.
+   ========================================================================== */
+
+:root {
+  /* --- Spider-Verse palette ------------------------------------------- */
+  --ink: #000000; /* true black — the page never deviates from this */
+  --ink-raised: #0a0a0c; /* panels sitting just above the page */
+  --red: #d32f2f; /* deep hero red */
+  --red-hot: #ff1744; /* accent / glow red */
+  --blue: #2979ff; /* electric blue */
+  --blue-deep: #0d47a1; /* shadowed blue */
+  --paper: #f5f2ea; /* off-white, newsprint rather than pure #fff */
+  --paper-dim: rgba(245, 242, 234, 0.55);
+  --paper-faint: rgba(245, 242, 234, 0.16);
+
+  /* --- Comic print artifacts ------------------------------------------ */
+  --halftone-size: 4px; /* dot pitch of the benday screen */
+  --halftone-alpha: 0.055;
+  --scanline-size: 3px;
+  --scanline-alpha: 0.16;
+  --grain-alpha: 0.05;
+  --aberration: 2px; /* chromatic split distance on text */
+
+  /* --- Type ------------------------------------------------------------ */
+  --font-display: "Impact", "Haettenschweiler", "Franklin Gothic Bold",
+    "Arial Black", sans-serif;
+  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Fluid display size — scales between mobile and desktop without steps */
+  --step-quote: clamp(2.1rem, 7.2vw, 6.5rem);
+  --step-cta: clamp(2.4rem, 8vw, 7.5rem);
+  --step-label: clamp(0.62rem, 1.1vw, 0.78rem);
+  --step-body: clamp(0.9rem, 1.6vw, 1.05rem);
+
+  --track-label: 0.42em; /* letterspacing for small caps labels */
+
+  /* --- Motion ---------------------------------------------------------- */
+  --dur-fast: 0.4s;
+  --dur-mid: 0.9s;
+  --dur-slow: 1.6s;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Layout ---------------------------------------------------------- */
+  --gutter: clamp(1.25rem, 5vw, 5rem);
+  --max-line: 22ch;
+}
+
+/* Damp the print artifacts on small screens — at phone pixel density the
+   dots and scanlines turn to mud if they stay at desktop scale. */
+@media (max-width: 768px) {
+  :root {
+    --halftone-size: 3px;
+    --scanline-size: 2px;
+    --scanline-alpha: 0.1;
+    --aberration: 1px;
+  }
+}

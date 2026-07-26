@@ -1,0 +1,316 @@
+/* ==========================================================================
+   Collage — floating comic panels
+   ========================================================================== */
+
+.collage {
+  position: relative;
+  padding: clamp(6rem, 18vh, 14rem) var(--gutter) clamp(8rem, 22vh, 18rem);
+  background: var(--ink);
+}
+
+/* --- Section heading --------------------------------------------------- */
+.collage-head {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0 auto clamp(4rem, 12vh, 9rem);
+  text-align: center;
+}
+
+.collage-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 5vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+
+/* --- Grid --------------------------------------------------------------
+   A 12-column bed with panels placed at irregular spans and offsets, so the
+   arrangement reads as a scatter rather than a gallery. */
+.collage-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: clamp(2rem, 5vw, 4.5rem) clamp(1.5rem, 4vw, 4rem);
+  max-width: 90rem;
+  margin: 0 auto;
+  align-items: start;
+}
+
+.panel {
+  position: relative;
+  margin: 0;
+  transform: rotate(var(--tilt));
+}
+
+/* Alternating placement — each nth-child gets its own column run and a
+   vertical offset that breaks the baseline. */
+.panel--lg {
+  grid-column: span 7;
+}
+.panel--md {
+  grid-column: span 6;
+}
+.panel--sm {
+  grid-column: span 4;
+}
+
+.panel:nth-child(1) {
+  grid-column: 1 / span 7;
+}
+.panel:nth-child(2) {
+  grid-column: 9 / span 4;
+  margin-top: clamp(2rem, 7vh, 5rem);
+}
+.panel:nth-child(3) {
+  grid-column: 2 / span 5;
+  margin-top: clamp(-6rem, -4vh, 0rem);
+}
+.panel:nth-child(4) {
+  grid-column: 8 / span 5;
+  margin-top: clamp(1rem, 4vh, 3rem);
+}
+.panel:nth-child(5) {
+  grid-column: 1 / span 4;
+}
+.panel:nth-child(6) {
+  grid-column: 6 / span 7;
+  margin-top: clamp(-4rem, -3vh, 0rem);
+}
+
+/* --- Frame -------------------------------------------------------------
+   Double border with an offset shadow plate = comic panel misregistration. */
+.panel-frame {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--ink-raised);
+  border: 1px solid rgba(245, 242, 234, 0.3);
+  box-shadow:
+    calc(var(--aberration) * -2) 0 0 rgba(211, 47, 47, 0.75),
+    calc(var(--aberration) * 2) 0 0 rgba(41, 121, 255, 0.7),
+    0 30px 80px -20px rgba(0, 0, 0, 0.9);
+}
+
+.panel--sm .panel-frame {
+  aspect-ratio: 3 / 4;
+}
+
+.panel--lg .panel-frame {
+  aspect-ratio: 16 / 9;
+}
+
+/* --- Video -------------------------------------------------------------
+   Sits above the procedural fill. An empty/failed <video> paints nothing,
+   so the fill below simply remains visible. */
+.panel-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Duotone push: crush to grayscale, then tint via the blend layers. */
+  filter: grayscale(1) contrast(1.35) brightness(0.85);
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease-out);
+}
+
+/* Set by JS once the file actually has data — never on a missing source. */
+.panel-video.is-live {
+  opacity: 1;
+}
+
+/* --- Procedural comic fill --------------------------------------------- */
+.panel-fill,
+.panel-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.panel-fill > *,
+.panel-fx > * {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* Slow-drifting duotone wash — the "motion" in a panel with no footage.
+   Kept bright: this is the subject of the frame, not a background tint. */
+.panel-fill-wash {
+  background: linear-gradient(
+    135deg,
+    var(--wash-a, var(--red)) 0%,
+    color-mix(in srgb, var(--wash-a) 55%, var(--ink)) 30%,
+    var(--ink-raised) 50%,
+    color-mix(in srgb, var(--wash-b) 55%, var(--ink)) 70%,
+    var(--wash-b, var(--blue)) 100%
+  );
+  background-size: 300% 300%;
+  opacity: 1;
+  animation: panel-wash 18s ease-in-out infinite alternate;
+}
+
+@keyframes panel-wash {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Benday screen — coarse enough to read as print at panel scale. */
+.panel-fill-dots {
+  background-image: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 0.7) 1.4px,
+    transparent 1.7px
+  );
+  background-size: 7px 7px;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+
+/* Web geometry — a corner anchor rather than a full radar sweep. */
+.panel-fill-web {
+  background-image:
+    repeating-conic-gradient(
+      from 200deg at 12% 8%,
+      rgba(245, 242, 234, 0.16) 0deg 0.35deg,
+      transparent 0.35deg 15deg
+    ),
+    repeating-radial-gradient(
+      circle at 12% 8%,
+      transparent 0 34px,
+      rgba(245, 242, 234, 0.13) 34px 35px
+    );
+  /* Fade the web out toward the far corner so it doesn't fill the frame. */
+  -webkit-mask-image: radial-gradient(
+    circle at 12% 8%,
+    #000 0%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(circle at 12% 8%, #000 0%, transparent 72%);
+  opacity: 0.9;
+}
+
+/* Tone variants — drive the wash gradient stops. */
+.panel--red {
+  --wash-a: var(--red);
+  --wash-b: var(--red-hot);
+}
+.panel--blue {
+  --wash-a: var(--blue-deep);
+  --wash-b: var(--blue);
+}
+.panel--split {
+  --wash-a: var(--red);
+  --wash-b: var(--blue);
+}
+
+/* When a video is live the fill becomes the tint layer rather than the
+   subject — multiply over the grayscale footage produces the duotone. */
+.panel-video.is-live ~ .panel-fill .panel-fill-wash {
+  mix-blend-mode: color;
+  opacity: 0.8;
+  animation-duration: 26s; /* calmer once there's real motion underneath */
+}
+
+.panel-video.is-live ~ .panel-fill .panel-fill-web {
+  opacity: 0.25;
+}
+
+/* --- Per-panel VHS treatment ------------------------------------------- */
+.panel-fx-scan {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.28) 0 1px,
+    transparent 1px 3px
+  );
+  opacity: 0.55;
+}
+
+/* Horizontal tracking bleed that sweeps down the frame occasionally. */
+.panel-fx-bleed {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(245, 242, 234, 0.16) 48%,
+    rgba(41, 121, 255, 0.12) 50%,
+    transparent 52%,
+    transparent 100%
+  );
+  background-size: 100% 220%;
+  mix-blend-mode: screen;
+  animation: panel-bleed 7s linear infinite;
+}
+
+@keyframes panel-bleed {
+  0%,
+  62% {
+    background-position: 0 -120%;
+  }
+  100% {
+    background-position: 0 120%;
+  }
+}
+
+/* --- Frame furniture ---------------------------------------------------- */
+.panel-index {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.9rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.4vw, 3rem);
+  line-height: 1;
+  color: var(--paper);
+  opacity: 0.85;
+  mix-blend-mode: difference;
+  letter-spacing: -0.02em;
+}
+
+.panel-label {
+  margin-top: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+
+/* --- Responsive --------------------------------------------------------
+   Below 768px everything collapses to one column, tilts are removed, and
+   Collage.js damps the parallax. */
+@media (max-width: 768px) {
+  .collage-grid {
+    display: flex;
+    flex-direction: column;
+    /* `start` from the grid rules resolves to the cross axis here and would
+       shrink every panel to its content width. */
+    align-items: stretch;
+    gap: clamp(3rem, 10vh, 5rem);
+  }
+
+  .panel,
+  .panel:nth-child(n) {
+    grid-column: auto;
+    width: 100%;
+    margin-top: 0;
+    transform: none;
+  }
+
+  .panel-frame,
+  .panel--sm .panel-frame,
+  .panel--lg .panel-frame {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-fill-wash,
+  .panel-fx-bleed {
+    animation: none;
+  }
+}

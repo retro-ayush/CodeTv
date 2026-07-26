@@ -1,25 +1,86 @@
 ---
 import '../styles/global.css';
-import Hero from '../components/Hero/Hero.astro';
-import Boxes from '../components/Boxes/Boxes.astro';
-import MotionPath from '../components/MotionPath/MotionPath.astro';
-import Physics from '../components/Physics/Physics.astro';
-import ScrollPin from '../components/ScrollPin/ScrollPin.astro';
+import Loader from '../components/Loader/Loader.astro';
+import SpiderHero from '../components/SpiderHero/SpiderHero.astro';
+import Collage from '../components/Collage/Collage.astro';
+import Mask from '../components/Mask/Mask.astro';
+import Grain from '../components/FX/Grain.astro';
+
+/*
+ * The Webflow starter demos (Hero, Boxes, MotionPath, Physics, ScrollPin)
+ * remain in src/components/ as GSAP references but are intentionally not
+ * mounted here.
+ */
 ---
 
-<html lang="en">
+<html lang="en" id="top">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro + GSAP</title>
+		<meta
+			name="description"
+			content="With great power comes great responsibility — a cinematic retro-comic tribute."
+		/>
+		<meta name="theme-color" content="#000000" />
+		<title>With Great Power</title>
+
+		<!--
+			Create the intro gate before any module script evaluates. Module
+			scripts are deferred and their relative order isn't guaranteed, so
+			SpiderHero.js could otherwise read `window.__introDone` as undefined
+			and start the quote underneath the loader.
+		-->
+		<script is:inline>
+			window.__introDone = new Promise((resolve) => {
+				window.__introRelease = resolve;
+			});
+		</script>
 	</head>
 	<body>
-		<Hero />
-		<Boxes />
-		<MotionPath />
-		<Physics />
-		<ScrollPin />
+		<!-- Rendered first so it paints before anything below it. Lives outside
+		     #smooth-wrapper so ScrollSmoother never transforms it. -->
+		<Loader />
+
+		<Grain />
+
+		<!-- ScrollSmoother requires this exact wrapper > content nesting. -->
+		<div id="smooth-wrapper">
+			<div id="smooth-content">
+				<main>
+					<SpiderHero />
+					<Collage />
+					<Mask />
+				</main>
+			</div>
+		</div>
+
+		<script>
+			import { ScrollSmoother } from '../lib/gsap.js';
+
+			const reduced = window.matchMedia(
+				'(prefers-reduced-motion: reduce)'
+			).matches;
+
+			/* Smoothing is a motion effect — skip it entirely when reduced motion
+			   is requested and let the browser scroll natively. The class also
+			   activates the fixed-position wrapper, so it must be set either way.
+
+			   Deferred until the loader clears: creating the smoother while the
+			   page is scroll-locked would measure the wrong content height. */
+			if (!reduced) {
+				(window.__introDone ?? Promise.resolve()).then(() => {
+					ScrollSmoother.create({
+						wrapper: '#smooth-wrapper',
+						content: '#smooth-content',
+						smooth: 1.4,
+						effects: true,
+						normalizeScroll: true,
+					});
+					document.documentElement.classList.add('smoother-ready');
+				});
+			}
+		</script>
 	</body>
 </html>

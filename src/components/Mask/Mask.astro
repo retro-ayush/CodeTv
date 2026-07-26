@@ -1,0 +1,36 @@
+---
+/**
+ * Mask — closing statement.
+ *
+ * Mirrors the hero's reveal but slower and tighter, so the page ends on the
+ * same note it opened with.
+ */
+import './Mask.css';
+
+const LINE = 'Anyone can wear the mask.';
+---
+
+<section class="mask" data-mask>
+	<div class="mask-glow" aria-hidden="true" data-mask-glow></div>
+
+	<div class="mask-inner">
+		<p class="eyebrow mask-eyebrow" data-mask-eyebrow>End of transmission</p>
+
+		<h2 class="mask-line" data-mask-line aria-label={LINE}>
+			<span aria-hidden="true">{LINE}</span>
+		</h2>
+
+		<a class="mask-cta" href="#top" data-mask-cta>
+			<span class="mask-cta-label">Replay from the top</span>
+			<span class="mask-cta-rule" aria-hidden="true"></span>
+		</a>
+	</div>
+
+	<footer class="mask-foot">
+		<span class="eyebrow">Built with Astro &amp; GSAP</span>
+	</footer>
+</section>
+
+<script>
+	import './Mask.js';
+</script>

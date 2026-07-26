@@ -1,0 +1,82 @@
+---
+/**
+ * SpiderHero — full-screen cinematic intro.
+ *
+ * Deliberately minimal: one quote, one attribution, one scroll cue. All the
+ * drama comes from timing (SpiderHero.js), not from stacked elements.
+ */
+import './SpiderHero.css';
+
+const QUOTE = 'With great power comes great responsibility';
+---
+
+<section class="hero" data-hero>
+	<!-- Web strands drawn behind the quote. DrawSVGPlugin traces each path on
+	     load; the strands then drift on a slow loop. -->
+	<svg
+		class="hero-web"
+		viewBox="0 0 1000 1000"
+		preserveAspectRatio="xMidYMid slice"
+		aria-hidden="true"
+		data-web
+	>
+		<g class="hero-web-radial" stroke="currentColor" fill="none">
+			<path d="M500 500 L500 -200" data-strand />
+			<path d="M500 500 L1200 100" data-strand />
+			<path d="M500 500 L1300 500" data-strand />
+			<path d="M500 500 L1200 900" data-strand />
+			<path d="M500 500 L500 1200" data-strand />
+			<path d="M500 500 L-200 900" data-strand />
+			<path d="M500 500 L-300 500" data-strand />
+			<path d="M500 500 L-200 100" data-strand />
+		</g>
+		<g class="hero-web-spiral" stroke="currentColor" fill="none">
+			<path
+				d="M500 260 Q720 280 740 500 Q720 720 500 740 Q280 720 260 500 Q280 280 500 260"
+				data-strand
+			/>
+			<path
+				d="M500 120 Q860 150 880 500 Q860 850 500 880 Q140 850 120 500 Q140 150 500 120"
+				data-strand
+			/>
+			<path
+				d="M500 -20 Q1000 20 1020 500 Q1000 980 500 1020 Q0 980 -20 500 Q0 20 500 -20"
+				data-strand
+			/>
+		</g>
+	</svg>
+
+	<div class="hero-inner">
+		<p class="eyebrow hero-eyebrow" data-eyebrow>Ben Parker &middot; Uncle</p>
+
+		<!--
+			The quote is split into chars by SplitText at runtime. Two mirrored
+			copies sit behind the real text to fake CMYK misregistration — they
+			are offset in red and blue, then converge as the line settles.
+			aria-label carries the readable string; the visual layers are hidden
+			from the accessibility tree.
+		-->
+		<h1 class="hero-quote" data-quote aria-label={QUOTE}>
+			<span class="hero-quote-ghost hero-quote-ghost--red" aria-hidden="true"
+				>{QUOTE}</span
+			>
+			<span class="hero-quote-ghost hero-quote-ghost--blue" aria-hidden="true"
+				>{QUOTE}</span
+			>
+			<span class="hero-quote-text" data-quote-text aria-hidden="true"
+				>{QUOTE}</span
+			>
+		</h1>
+
+		<div class="hero-rule" data-rule></div>
+	</div>
+
+	<div class="hero-cue" data-cue>
+		<span class="eyebrow">Scroll</span>
+		<span class="hero-cue-line" aria-hidden="true"></span>
+	</div>
+</section>
+
+<script>
+	import './SpiderHero.js';
+</script>

@@ -1,0 +1,376 @@
+/* ==========================================================================
+   Loader — full-bleed comic flipbook intro
+   ========================================================================== */
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 200; /* above .fx (100) */
+  background: var(--ink);
+  overflow: hidden;
+  /* Perspective makes the frame push-in read as camera movement rather than
+     a flat scale. */
+  perspective: 1200px;
+}
+
+.loader.is-done {
+  pointer-events: none;
+}
+
+/* --- Reel --------------------------------------------------------------
+   Frames are stacked, not laid side by side. JS shows exactly one at a
+   time, which is what makes it read as a hard cut. */
+.loader-reel {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.iframe {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  overflow: hidden;
+  will-change: opacity, transform;
+}
+
+.iframe-art,
+.iframe-gutter {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* Panel gutter — thick black comic border around every frame. */
+.iframe-gutter {
+  border: clamp(10px, 2.2vw, 26px) solid var(--ink);
+  /* Vignette kept light — at 0.75 it crushed the whole composition to black. */
+  box-shadow:
+    inset 0 0 0 2px rgba(245, 242, 234, 0.28),
+    inset 0 0 90px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* --- Duotone tones ------------------------------------------------------ */
+.iframe--red {
+  --ca: var(--red);
+  --cb: var(--red-hot);
+}
+.iframe--blue {
+  /* --blue-deep alone is too dark to read at flip speed. */
+  --ca: var(--blue);
+  --cb: #5b9dff;
+}
+.iframe--split {
+  --ca: var(--red);
+  --cb: var(--blue);
+}
+
+/* Shared base. No blend mode here: multiplying the halftone against the
+   duotone crushed every composition to black. The dot layer's own alpha is
+   what keeps it subtle. */
+.iframe-art {
+  background-color: var(--ink-raised);
+  /* Lift the whole frame — these are lit comic panels, not night shots. */
+  filter: brightness(1.35) contrast(1.15) saturate(1.2);
+}
+
+/* --- Composition: FIGURE ------------------------------------------------
+   A silhouetted body mass with a rim light — reads as a hero in frame. */
+.iframe--figure .iframe-art {
+  background-image:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.42) 1.3px, transparent 1.6px),
+    radial-gradient(
+      ellipse 22% 42% at 50% 58%,
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.66) 55%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 9% 12% at 50% 26%,
+      rgba(0, 0, 0, 0.82) 0%,
+      transparent 78%
+    ),
+    linear-gradient(
+      118deg,
+      var(--ca) 0%,
+      color-mix(in srgb, var(--ca) 45%, var(--ink)) 38%,
+      var(--cb) 100%
+    );
+  background-size:
+    7px 7px,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+}
+
+/* --- Composition: BURST -------------------------------------------------
+   Radial speed lines exploding from an off-centre point. */
+.iframe--burst .iframe-art {
+  background-image:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.42) 1.3px, transparent 1.6px),
+    repeating-conic-gradient(
+      from 0deg at 42% 46%,
+      rgba(0, 0, 0, 0.6) 0deg 1.6deg,
+      transparent 1.6deg 5deg
+    ),
+    radial-gradient(
+      circle at 42% 46%,
+      var(--cb) 0%,
+      var(--ca) 30%,
+      var(--ink) 78%
+    );
+  background-size:
+    7px 7px,
+    100% 100%,
+    100% 100%;
+}
+
+/* --- Composition: CITY --------------------------------------------------
+   Hard-edged skyline built from repeating bars of varying height. */
+.iframe--city .iframe-art {
+  background-image:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.42) 1.3px, transparent 1.6px),
+    linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.78) 0 3%,
+      transparent 3% 6%,
+      rgba(0, 0, 0, 0.78) 6% 11%,
+      transparent 11% 13%,
+      rgba(0, 0, 0, 0.78) 13% 16%,
+      transparent 16% 21%,
+      rgba(0, 0, 0, 0.78) 21% 27%,
+      transparent 27% 29%,
+      rgba(0, 0, 0, 0.78) 29% 34%,
+      transparent 34% 38%,
+      rgba(0, 0, 0, 0.78) 38% 41%,
+      transparent 41% 46%,
+      rgba(0, 0, 0, 0.78) 46% 52%,
+      transparent 52% 55%,
+      rgba(0, 0, 0, 0.78) 55% 61%,
+      transparent 61% 64%,
+      rgba(0, 0, 0, 0.78) 64% 70%,
+      transparent 70% 74%,
+      rgba(0, 0, 0, 0.78) 74% 79%,
+      transparent 79% 83%,
+      rgba(0, 0, 0, 0.78) 83% 89%,
+      transparent 89% 92%,
+      rgba(0, 0, 0, 0.78) 92% 100%
+    ),
+    linear-gradient(to bottom, transparent 38%, rgba(0, 0, 0, 0.8) 42%),
+    linear-gradient(190deg, var(--cb) 0%, var(--ca) 55%, var(--ink) 100%);
+  background-size:
+    7px 7px,
+    100% 62%,
+    100% 100%,
+    100% 100%;
+  background-position:
+    0 0,
+    0 100%,
+    0 0,
+    0 0;
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+}
+
+/* --- Composition: GRID --------------------------------------------------
+   Multi-panel comic page — the "many panels at once" beat. */
+.iframe--grid .iframe-art {
+  background-image:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.42) 1.3px, transparent 1.6px),
+    linear-gradient(to right, var(--ink) 0 4px, transparent 4px),
+    linear-gradient(to bottom, var(--ink) 0 4px, transparent 4px),
+    linear-gradient(
+      135deg,
+      var(--ca) 0%,
+      var(--ink-raised) 48%,
+      var(--cb) 100%
+    );
+  background-size:
+    7px 7px,
+    33.33% 100%,
+    100% 50%,
+    100% 100%;
+}
+
+/* --- Composition: WEB ---------------------------------------------------
+   Full web geometry, corner-anchored, dense. */
+.iframe--web .iframe-art {
+  background-image:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.42) 1.3px, transparent 1.6px),
+    repeating-conic-gradient(
+      from 190deg at 18% 12%,
+      rgba(245, 242, 234, 0.34) 0deg 0.5deg,
+      transparent 0.5deg 12deg
+    ),
+    repeating-radial-gradient(
+      circle at 18% 12%,
+      transparent 0 46px,
+      rgba(245, 242, 234, 0.26) 46px 48px
+    ),
+    linear-gradient(150deg, var(--ca) 0%, var(--ink) 60%, var(--cb) 100%);
+  background-size:
+    7px 7px,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+}
+
+/* --- Composition: SPEECH ------------------------------------------------
+   Big empty bubble shape with action lines behind it. */
+.iframe--speech .iframe-art {
+  background-image:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.42) 1.3px, transparent 1.6px),
+    /* Bubble outline rather than a filled blob — a solid --paper ellipse at
+       62% covered the frame and read as a blank panel. */
+    radial-gradient(
+      ellipse 26% 19% at 52% 40%,
+      transparent 0%,
+      transparent 92%,
+      var(--paper) 93%,
+      var(--paper) 100%
+    ),
+    radial-gradient(
+      ellipse 24% 17% at 52% 40%,
+      rgba(10, 10, 12, 0.82) 0%,
+      rgba(10, 10, 12, 0.82) 100%
+    ),
+    repeating-linear-gradient(
+      -18deg,
+      rgba(0, 0, 0, 0.3) 0 3px,
+      transparent 3px 16px
+    ),
+    linear-gradient(90deg, var(--ca) 0%, var(--cb) 100%);
+  background-size:
+    7px 7px,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+}
+
+/* --- VHS layer ---------------------------------------------------------- */
+.loader-vhs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.loader-vhs > * {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.loader-vhs-scan {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.3) 0 1px,
+    transparent 1px 3px
+  );
+  opacity: 0.5;
+}
+
+/* Driven by JS during the burst beat. */
+.loader-vhs-flicker {
+  background: var(--paper);
+  opacity: 0;
+  mix-blend-mode: overlay;
+}
+
+/* --- Title -------------------------------------------------------------- */
+.loader-title {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.loader-title-layer {
+  grid-area: 1 / 1;
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 17vw, 15rem);
+  line-height: 0.85;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.loader-title-layer--main {
+  color: var(--paper);
+}
+.loader-title-layer--red {
+  color: var(--red-hot);
+  mix-blend-mode: screen;
+}
+.loader-title-layer--blue {
+  color: var(--blue);
+  mix-blend-mode: screen;
+}
+
+/* --- HUD ---------------------------------------------------------------- */
+.loader-hud {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1.75rem, 6vh, 3.5rem);
+  translate: -50% 0;
+  z-index: 5;
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+}
+
+.loader-meter {
+  position: relative;
+  width: min(14rem, 44vw);
+  height: 1px;
+  background: rgba(245, 242, 234, 0.18);
+  overflow: hidden;
+}
+
+.loader-meter-fill {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: linear-gradient(to right, var(--red), var(--blue));
+}
+
+.loader-count {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+  letter-spacing: 0.18em;
+  color: var(--paper-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Shutter wipe -------------------------------------------------------- */
+.loader-wipe {
+  position: absolute;
+  left: -2%;
+  width: 104%;
+  height: 51%;
+  background: var(--ink);
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0;
+}
+
+.loader-wipe--top {
+  top: 0;
+}
+.loader-wipe--bottom {
+  bottom: 0;
+}
+
+/* --- Reduced motion ------------------------------------------------------
+   Show one composed frame and the title, statically. */
+@media (prefers-reduced-motion: reduce) {
+  .loader-vhs-scan {
+    opacity: 0.25;
+  }
+}

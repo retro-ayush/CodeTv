@@ -1,0 +1,153 @@
+---
+/**
+ * Collage — scroll-triggered retro video panels.
+ *
+ * ── CUSTOMISING ───────────────────────────────────────────────────────────
+ * Everything is driven by the PANELS array below. To add, remove, or reorder
+ * a panel, edit that array — the layout, animation, and playback wiring all
+ * follow automatically.
+ *
+ *   src      file in /public/videos/ (omit the extension-less path prefix)
+ *   poster   still frame in /public/posters/, shown before the video loads
+ *   label    small mono caption rendered under the frame
+ *   index    the "issue number" stamped on the frame
+ *   tone     'red' | 'blue' | 'split' — duotone treatment
+ *   size     'sm' | 'md' | 'lg' — grid footprint on desktop
+ *   drift    parallax strength; higher = moves more against the scroll
+ *   tilt     resting rotation in degrees
+ *
+ * Panels render as animated comic frames when no video file is present, so
+ * the page is complete before any footage exists. Drop a matching .mp4 into
+ * /public/videos/ and it takes over automatically — no code change needed.
+ * ──────────────────────────────────────────────────────────────────────────
+ */
+import './Collage.css';
+
+const PANELS = [
+	{
+		src: '/videos/panel-01-swing.mp4',
+		poster: '/posters/panel-01-swing.jpg',
+		label: 'Swing cycle // rooftop',
+		index: '01',
+		tone: 'red',
+		size: 'lg',
+		drift: 90,
+		tilt: -3.5,
+	},
+	{
+		src: '/videos/panel-02-mask.mp4',
+		poster: '/posters/panel-02-mask.jpg',
+		label: 'The mask // close',
+		index: '02',
+		tone: 'blue',
+		size: 'sm',
+		drift: -60,
+		tilt: 4,
+	},
+	{
+		src: '/videos/panel-03-city.mp4',
+		poster: '/posters/panel-03-city.jpg',
+		label: 'Skyline // 2:14 AM',
+		index: '03',
+		tone: 'split',
+		size: 'md',
+		drift: 130,
+		tilt: 2.5,
+	},
+	{
+		src: '/videos/panel-04-leap.mp4',
+		poster: '/posters/panel-04-leap.jpg',
+		label: 'Leap of faith',
+		index: '04',
+		tone: 'red',
+		size: 'md',
+		drift: -95,
+		tilt: -5,
+	},
+	{
+		src: '/videos/panel-05-glitch.mp4',
+		poster: '/posters/panel-05-glitch.jpg',
+		label: 'Dimensional bleed',
+		index: '05',
+		tone: 'blue',
+		size: 'sm',
+		drift: 70,
+		tilt: 3,
+	},
+	{
+		src: '/videos/panel-06-web.mp4',
+		poster: '/posters/panel-06-web.jpg',
+		label: 'Web shot // frame 08',
+		index: '06',
+		tone: 'split',
+		size: 'lg',
+		drift: -120,
+		tilt: -2,
+	},
+];
+---
+
+<section class="collage" data-collage>
+	<header class="collage-head" data-collage-head>
+		<p class="eyebrow">Recovered footage</p>
+		<h2 class="collage-title" data-collage-title>Memories in motion</h2>
+	</header>
+
+	<div class="collage-grid">
+		{
+			PANELS.map((panel) => (
+				<figure
+					class={`panel panel--${panel.size} panel--${panel.tone}`}
+					data-panel
+					data-drift={panel.drift}
+					data-tilt={panel.tilt}
+					style={`--tilt:${panel.tilt}deg`}
+				>
+					<div class="panel-frame">
+						{/*
+							preload="none" keeps six videos off the critical path; the
+							ScrollTrigger in Collage.js calls load() as each nears the
+							viewport. If the file is missing the <video> stays empty and
+							the CSS comic treatment below shows through instead.
+						*/}
+						<video
+							class="panel-video"
+							data-panel-video
+							src={panel.src}
+							poster={panel.poster}
+							muted
+							loop
+							playsinline
+							preload="none"
+							tabindex="-1"
+							aria-hidden="true"
+						/>
+
+						{/* Procedural comic fill — visible until a video loads over it. */}
+						<div class="panel-fill" aria-hidden="true">
+							<span class="panel-fill-wash" />
+							<span class="panel-fill-dots" />
+							<span class="panel-fill-web" />
+						</div>
+
+						{/* Per-panel VHS treatment, layered over video or fill alike. */}
+						<div class="panel-fx" aria-hidden="true">
+							<span class="panel-fx-scan" />
+							<span class="panel-fx-bleed" />
+						</div>
+
+						<span class="panel-index" aria-hidden="true">
+							{panel.index}
+						</span>
+					</div>
+
+					<figcaption class="panel-label">{panel.label}</figcaption>
+				</figure>
+			))
+		}
+	</div>
+</section>
+
+<script>
+	import './Collage.js';
+</script>

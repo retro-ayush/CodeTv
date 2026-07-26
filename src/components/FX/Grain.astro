@@ -1,0 +1,36 @@
+---
+/**
+ * Grain — page-wide print/VHS artifact stack.
+ *
+ * Sits above everything at pointer-events:none. Four layers, cheapest first:
+ *   1. halftone  — benday dot screen (static, pure CSS gradient)
+ *   2. scanlines — CRT line pattern, drifts slowly
+ *   3. grain     — animated film noise (SVG turbulence, no image asset)
+ *   4. vignette  — darkens the frame edges
+ *
+ * Rendered once in the layout, not per-section.
+ */
+import './Grain.css';
+---
+
+<div class="fx" aria-hidden="true">
+	<div class="fx-halftone"></div>
+	<div class="fx-scanlines"></div>
+	<div class="fx-grain"></div>
+	<div class="fx-vignette"></div>
+</div>
+
+<!-- Noise source for the grain layer. An inline SVG filter keeps this
+     asset-free; fractalNoise at high frequency reads as 35mm grain. -->
+<svg class="fx-noise-def" aria-hidden="true" focusable="false">
+	<filter id="fx-noise">
+		<feTurbulence
+			type="fractalNoise"
+			baseFrequency="0.85"
+			numOctaves="3"
+			stitchTiles="stitch"
+		/>
+		<feColorMatrix type="saturate" values="0" />
+	</filter>
+	<rect width="100%" height="100%" filter="url(#fx-noise)"></rect>
+</svg>

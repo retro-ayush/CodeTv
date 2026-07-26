@@ -1,0 +1,156 @@
+/* ==========================================================================
+   SpiderHero — full-screen quote intro
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: calc(var(--gutter) * 1.5) var(--gutter);
+  overflow: hidden;
+  background: var(--ink);
+}
+
+/* --- Web strands ------------------------------------------------------- */
+.hero-web {
+  position: absolute;
+  /* Oversized so the slow rotation never swings an edge into frame. */
+  inset: -25%;
+  width: 150%;
+  height: 150%;
+  color: var(--paper);
+  opacity: 0.14;
+  pointer-events: none;
+}
+
+.hero-web-radial {
+  stroke-width: 1;
+}
+
+.hero-web-spiral {
+  stroke-width: 1.25;
+  color: var(--blue);
+  opacity: 0.75;
+}
+
+/* --- Quote block ------------------------------------------------------- */
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: clamp(1.1rem, 3vw, 2rem);
+  text-align: center;
+  max-width: 60rem;
+}
+
+.hero-eyebrow {
+  order: 2; /* attribution reads below the quote */
+  opacity: 0; /* JS fades it in; keeps it hidden pre-hydration */
+}
+
+.hero-quote {
+  order: 1;
+  position: relative;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--step-quote);
+  line-height: 0.94;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  max-width: var(--max-line);
+  text-wrap: balance;
+}
+
+/* The two ghost copies stack exactly under the real text. */
+.hero-quote-ghost {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+.hero-quote-ghost--red {
+  color: var(--red-hot);
+}
+
+.hero-quote-ghost--blue {
+  color: var(--blue);
+}
+
+.hero-quote-text {
+  position: relative;
+  display: block;
+  color: var(--paper);
+}
+
+/* SplitText wraps each character; this is the per-char resting state. */
+.hero-quote .char {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+}
+
+/* Hairline that draws out under the quote once the line lands. */
+.hero-rule {
+  order: 3;
+  width: min(22rem, 60vw);
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--red) 30%,
+    var(--blue) 70%,
+    transparent
+  );
+  transform: scaleX(0);
+}
+
+/* --- Scroll cue -------------------------------------------------------- */
+.hero-cue {
+  position: absolute;
+  bottom: clamp(1.5rem, 4vh, 3rem);
+  left: 50%;
+  translate: -50% 0;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  opacity: 0;
+}
+
+.hero-cue-line {
+  display: block;
+  width: 1px;
+  height: clamp(2rem, 6vh, 3.5rem);
+  background: linear-gradient(to bottom, var(--paper-faint), transparent);
+  transform-origin: top;
+  animation: hero-cue-pulse 2.4s var(--ease-out) infinite;
+}
+
+@keyframes hero-cue-pulse {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-quote {
+    max-width: 14ch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-cue-line {
+    animation: none;
+    transform: scaleY(1);
+  }
+}
