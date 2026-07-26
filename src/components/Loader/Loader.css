@@ -22,9 +22,12 @@
    time, which is what makes it read as a hard cut. */
 .loader-reel {
   position: absolute;
-  inset: 0;
+  /* Oversized so the 1.5 camera push and the 1.6 exit never pull a bare edge
+     into frame. */
+  inset: -10%;
+  transform-origin: 50% 50%;
   transform-style: preserve-3d;
-  will-change: transform;
+  /* Deliberately unpromoted — see .iframe above for why. */
 }
 
 .iframe {
@@ -32,7 +35,12 @@
   inset: 0;
   opacity: 0;
   overflow: hidden;
-  will-change: opacity, transform;
+  /* Only opacity is promoted. These sit inside .loader-reel, which the camera
+     scales to 1.5; promoting `transform` here pinned each layer's texture to
+     the pre-scale bounds, so past 1.0 the frames painted as a cropped
+     rectangle with hard black edges. Software raster (device-emulation mode)
+     never showed it, which is why it only appeared on a real display. */
+  will-change: opacity;
 }
 
 .iframe-art,
@@ -292,11 +300,18 @@
   grid-area: 1 / 1;
   font-family: var(--font-display);
   font-size: clamp(3.2rem, 17vw, 15rem);
-  line-height: 0.85;
+  /* Impact's caps are ~72% of em and its ascenders overshoot the em box, so a
+     sub-1 line-height clipped the glyph tops and bottoms. Visual centring
+     comes from the grid, not the leading, so nothing shifts. */
+  line-height: 1.05;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  white-space: nowrap;
   opacity: 0;
-  will-change: transform, opacity;
+  /* Not `transform`: these scale from 2.6 down to 1, and a pinned backing
+     store rasterises them at rest size then upscales — the enlarged frames
+     then paint as a clipped band. */
+  will-change: opacity;
 }
 
 .loader-title-layer--main {

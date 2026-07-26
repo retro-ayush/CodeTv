@@ -226,7 +226,10 @@ if (!loader) {
        thread stalls (font decode, style recalc, the panel-video 404s), and
        the wipe would then start while the title was still crashing in —
        which is what cut the word in half on some loads. */
-    tl.to({}, { duration: 0.35 }, SETTLE + 1.15);
+    /* Starts at +1.25, where the glitch keyframes finish. Overlapping them let
+       the exit begin mid-glitch, freezing the red/blue layers at their thrown
+       apart offsets instead of the converged ±5px. */
+    tl.to({}, { duration: 0.4 }, SETTLE + 1.25);
 
     /* Timeline finished => the title has definitely landed and held. */
     const introPlayed = new Promise((resolve) => {
@@ -236,6 +239,11 @@ if (!loader) {
     Promise.race([Promise.all([pageReady, introPlayed]), safetyNet]).then(() => {
       gsap
         .timeline({ onComplete: finish })
+        /* Normalise the chromatic offsets first: if the safety net fires
+           mid-glitch the layers would otherwise freeze tens of pixels apart
+           and read as three misaligned words. */
+        .set(titleRed, { x: -5 })
+        .set(titleBlue, { x: 5 })
         /* Title and reel punch away together. */
         .to([titleMain, titleRed, titleBlue], {
           scale: 1.3,
