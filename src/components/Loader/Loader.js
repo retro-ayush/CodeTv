@@ -255,6 +255,25 @@ if (!loader) {
         })
         .to(reel, { scale: 1.6, opacity: 0, duration: 0.6, ease: "power2.in" }, 0)
         .to(loader.querySelector(".loader-hud"), { opacity: 0, duration: 0.3 }, 0)
+        /* Release the hero one beat BEFORE the shutter parts.
+
+           The hero intro takes ~0.5s to fade its backdrop up from black and
+           begin the quote. Releasing it at teardown meant the shutter opened
+           onto an empty black stage and the page only started animating
+           afterwards — a visible dead gap. Starting it here means the suit is
+           already lit and the first characters are rising as the shutter
+           opens, so the two sequences overlap instead of queueing. */
+        .call(
+          () => {
+            /* Resolving twice is harmless — a settled promise ignores it —
+               but the scroll lock has to lift here too, otherwise the page
+               is unscrollable for the length of the wipe. */
+            document.body.style.overflow = "";
+            signalDone();
+          },
+          null,
+          0.2
+        )
         /* Shutter parts to reveal the hero. */
         .set(wipes, { opacity: 1 }, 0.25)
         .to(

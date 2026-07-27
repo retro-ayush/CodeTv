@@ -32,3 +32,5 @@ pnpm-debug.log*
 
 # misc
 *.tsbuildinfo
+
+/public/posters/README.md

@@ -44,11 +44,19 @@ if (hero) {
       { opacity: 0, scale: 1.12 },
       {
         opacity: 0.85,
-        scale: 1,
-        duration: 2.4,
+        /* Fast: the shutter takes ~0.95s to open, and a 2.4s ramp left the
+           backdrop still near-black as it cleared, which read as a dead
+           blackout between the loader and the page. */
+        duration: 0.7,
         ease: "power2.out",
         immediateRender: false,
       },
+      0
+    ).to(
+      suit,
+      /* The scale settle continues long after the fade, so the backdrop is
+         lit immediately but still drifting to rest as the quote arrives. */
+      { scale: 1, duration: 2.4, ease: "power2.out" },
       0
     );
 
